@@ -42,7 +42,7 @@ app.use((err, req, res, next) => {
   } else if (err.code === "LIMIT_FILE_SIZE") {
     res.status(400).send({
       status: false,
-      message: "Max file size is 2MB",
+      message: "Max file size is 100kb",
     });
   } else {
     res.status(404).send({
