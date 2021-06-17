@@ -34,7 +34,7 @@ exports.getAllProduct = (
                 }
                 const firstData = perPage * page - perPage;
                 connection.query(
-                    `SELECT * FROM product WHERE name LIKE ? LIMIT ?, ?`,
+                    `SELECT * FROM product WHERE name LIKE ? ORDER BY name ASC LIMIT ?, ? `,
                     [`%${keyword}%`, firstData, perPage],
                     (err, result) => {
                         if (!err) {
@@ -73,7 +73,7 @@ exports.insertProduct = (data) => {
 
 exports.updateProduct = (data) => {
     return new Promise((resolve, reject) => {
-        connection.query(`UPDATE product SET image = ?, name = ?, buy_price = ?, sell_price = ?, stock = ?`, [data.image, data.name, data.buy_price, data.sell_price, data.stock],
+        connection.query(`UPDATE product SET image = ?, name = ?, buy_price = ?, sell_price = ?, stock = ? WHERE id = ?`, [data.image, data.name, data.buy_price, data.sell_price, data.stock, data.id],
             (err, result) => {
                 if (!err) {
                     resolve(result)
@@ -92,7 +92,7 @@ exports.buyProduct = (id, total) => {
                     const stock = result[0].stock
                     if (stock > total) {
                         const newTotal = stock - total
-                        connection.query(`UPDATE product SET stock = ?`, newTotal,
+                        connection.query(`UPDATE product SET stock = ? WHERE id = ?`, [newTotal, id],
                             (err, buyResult) => {
                                 if (!err) {
                                     buyResult.stockAvailable = newTotal
@@ -104,6 +104,18 @@ exports.buyProduct = (id, total) => {
                     } else {
                         reject(new Error("not enough stock"));
                     }
+                } else {
+                    reject(new Error("Internal server error"));
+                }
+            })
+    })
+}
+exports.deleteProduct = (id) => {
+    return new Promise((resolve, reject) => {
+        connection.query(`DELETE FROM product WHERE id = ?`, id,
+            (err, result) => {
+                if (!err) {
+                    resolve(result)
                 } else {
                     reject(new Error("Internal server error"));
                 }

@@ -43,6 +43,8 @@ exports.insert = (req, res) => {
         stock,
     } = req.body;
 
+    console.log(req.body);
+
     const data = {
         image: image.path,
         name,
@@ -74,20 +76,18 @@ exports.update = async (req, res) => {
             image = req.file.path;
         }
 
-        const name = req.body.name ? req.body.name : res.product[0].name
-        const buyPrice = req.body.buyPrice ? req.body.buyPrice : res.product[0].buy_price
-        const sellPrice = req.body.sellPrice ? req.body.sellPrice : res.product[0].sell_price
-        const stock = req.body.stock ? req.body.stock : res.product[0].stock
+
+        const { name, buyPrice, sellPrice, stock } = req.body
 
         const data = {
             id: id,
             image,
             name,
             buy_price: buyPrice,
-            sellPrice: sellPrice,
+            sell_price: sellPrice,
             stock
         }
-
+        console.log(data);
         productModel
             .updateProduct(data)
             .then((result) => {
@@ -97,12 +97,12 @@ exports.update = async (req, res) => {
                 helper.printError(res, 500, err.message);
             });
 
-    } else {
+
+
+    }
+    else {
         helper.printError(res, 500, `can not find item with this ${id}`);
     }
-
-
-
 }
 
 exports.buy = (req, res) => {
@@ -113,6 +113,29 @@ exports.buy = (req, res) => {
         .buyProduct(id, total)
         .then((result) => {
             helper.printSuccess(res, 200, "succesfully buy this product", result);
+        })
+        .catch((err) => {
+            helper.printError(res, 500, err.message);
+        });
+}
+exports.deleteProduct = (req, res) => {
+    const id = req.params.id
+    console.log(id);
+    productModel
+        .deleteProduct(id)
+        .then((result) => {
+            helper.printSuccess(res, 200, "succesfully delete this product", result);
+        })
+        .catch((err) => {
+            helper.printError(res, 500, err.message);
+        });
+}
+exports.getOne = (req, res) => {
+    const id = req.params.id
+    productModel
+        .getOneProduct(id)
+        .then((result) => {
+            helper.printSuccess(res, 200, "succesfully get this product", result);
         })
         .catch((err) => {
             helper.printError(res, 500, err.message);
